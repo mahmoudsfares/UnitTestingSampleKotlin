@@ -1,18 +1,9 @@
-package com.example.unittestingsamplekotlin
+package com.example.unittestingsamplekotlin.model
 
+import com.example.unittestingsamplekotlin.data.FakeResponse
 import kotlinx.coroutines.delay
 
-class MainRepo {
-
-    private val db = mutableMapOf<String, User>()
-
-    fun save(user: User) = db.let { it[user.email] = user }
-
-    fun get(key: String): User? = db[key]
-
-    fun clear(key: String) = db.remove(key)
-
-    fun clearAll() = db.clear()
+class Repository {
 
     suspend fun getClass(age: Int): FakeResponse {
         delay(1000)

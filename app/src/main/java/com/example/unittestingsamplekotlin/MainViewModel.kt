@@ -2,28 +2,17 @@ package com.example.unittestingsamplekotlin
 
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
+import com.example.unittestingsamplekotlin.data.FakeBody
+import com.example.unittestingsamplekotlin.model.Repository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.io.IOException
 
-class MainViewModel constructor(
-    private val repo: MainRepo
-) {
-    suspend fun saveUser(user: User) {
-        repo.save(user)
-    }
+class MainViewModel constructor(private val repo: Repository) {
 
-    suspend fun getUser(id: String): User {
-        return repo.get(id) ?: throw IllegalArgumentException("User with id $id not found")
-    }
-
-    suspend fun deleteUser(id: String) {
-        repo.clear(id)
-    }
-
-    fun clearAll() = repo.clearAll()
-
-    suspend fun getClass(id: Int): String? {
+    suspend fun getClassNormally(age: Int): String? {
         try {
-            val response = repo.getClass(id)
+            val response = repo.getClass(age)
             return when (response.responseCode) {
                 200 -> {
                     Klaxon().parse<FakeBody>(response.jsonBody)!!.data
@@ -44,6 +33,36 @@ class MainViewModel constructor(
                 "No internet connection"
             } else {
                 "Unexpected error"
+            }
+        }
+    }
+
+    suspend fun getClassFlow(age: Int): Flow<String?> {
+        return flow {
+            emit("Loading..")
+            try {
+                val response = repo.getClass(age)
+                when (response.responseCode) {
+                    200 -> {
+                        emit(Klaxon().parse<FakeBody>(response.jsonBody)!!.data)
+                    }
+                    400 -> {
+                        emit(Klaxon().parse<FakeBody>(response.jsonBody)!!.error)
+                    }
+                    else -> {
+                        emit("Unexpected error")
+                    }
+                }
+            } catch (throwable: Throwable) {
+                // klaxon exception occurs when a parsing error happens
+                // but it also extends RuntimeException. This was noticed when the unit tests were run
+                if (throwable is java.lang.RuntimeException && throwable !is KlaxonException){
+                    emit("Server error")
+                } else if (throwable is IOException){
+                    emit("No internet connection")
+                } else {
+                    emit("Unexpected error")
+                }
             }
         }
     }

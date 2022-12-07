@@ -1,6 +1,8 @@
 package com.example.unittestingsamplekotlin
 
-class MainViewModelMockData {
+import com.example.unittestingsamplekotlin.data.FakeResponse
+
+class MockData {
     companion object {
         val ok = FakeResponse(
             200, """

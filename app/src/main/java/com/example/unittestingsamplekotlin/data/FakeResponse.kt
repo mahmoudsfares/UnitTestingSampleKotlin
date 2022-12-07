@@ -1,4 +1,4 @@
-package com.example.unittestingsamplekotlin
+package com.example.unittestingsamplekotlin.data
 
 import com.beust.klaxon.Json
 
